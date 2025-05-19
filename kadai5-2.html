@@ -4,9 +4,10 @@
     <title>演習課題5-2：外部APIの呼び出しテスト</title>
 </head>
 <body>
-    <h1 id="msg">何かのAPI</h1>
+    <h1 id="msg">何かのAPI <br>
+        (今回はHono作者の@yusukebeさんが作成したラーメン屋の情報を返すAPI)</h1>
     <form name="apiform"><p>
-        何かのフォーム：<input type="text" name="form_data">
+        何かのフォーム：店の名前をローマ字で入力<input type="text" name="form_data">
         <button type="button" id="btn1" onclick="some_api(this.form)">実行</button>
     </p></form>
     
@@ -14,7 +15,9 @@
     <script>
         async function some_api(myForm) {
             // ここにコードを書く
-            document.getElementById("result").innerHTML += myForm.form_data.value+"<br />";
+            const ramen = await fetch("https://ramen-api.dev/shops/"+myForm.form_data.value);
+            const resu = await ramen.text();
+            document.getElementById("result").innerHTML += resu+"<br />";
             document.apiform.reset();
         }
     </script>
