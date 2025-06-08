@@ -1,23 +1,59 @@
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="utf-8">
     <title>演習課題5-2：外部APIの呼び出しテスト</title>
 </head>
 <body>
-    <h1 id="msg">何かのAPI <br>
-        (今回はHono作者の@yusukebeさんが作成したラーメン屋の情報を返すAPI)</h1>
-    <form name="apiform"><p>
-        何かのフォーム：店の名前をローマ字で入力<input type="text" name="form_data">
-        <button type="button" id="btn1" onclick="some_api(this.form)">実行</button>
-    </p></form>
+    <h1 id="msg">ラーメン屋の情報を検索 <br>
+        (今回はHono作者の@yusukebeさんが作成したラーメン屋APIを使用)</h1>
+    
+    <form name="apiform">
+        <p>
+            店の名前をローマ字で入力：
+            <input type="text" name="form_data">
+            <button type="button" id="btn1" onclick="some_api(this.form)">実行</button>
+        </p>
+    </form>
     
     <div id="result"></div>
+
     <script>
         async function some_api(myForm) {
-            // ここにコードを書く
-            const ramen = await fetch("https://ramen-api.dev/shops/"+myForm.form_data.value);
-            const resu = await ramen.text();
-            document.getElementById("result").innerHTML += resu+"<br />";
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = ""; // 表示を初期化
+            const shopId = myForm.form_data.value.trim();
+
+            if (!shopId) {
+                resultDiv.innerHTML = "<p style='color:red;'>店名を入力してください。</p>";
+                return;
+            }
+
+            try {
+                const response = await fetch("https://ramen-api.dev/shops/" + encodeURIComponent(shopId));
+                if (!response.ok) {
+                    throw new Error("データ取得に失敗しました。店名が間違っている可能性があります。");
+                }
+
+                const json = await response.json();
+                const shop = json.shop;
+
+                // 表示内容の作成
+                let html = `<h2>${shop.name}</h2>`;
+
+                if (shop.photos && shop.photos.length > 0) {
+                    shop.photos.forEach(photo => {
+                        html += `<img src="${photo.url}" alt="${shop.name}" width="300"><br>`;
+                    });
+                } else {
+                    html += "<p>画像はありません。</p>";
+                }
+
+                resultDiv.innerHTML = html;
+            } catch (err) {
+                resultDiv.innerHTML = `<p style='color:red;'>${err.message}</p>`;
+            }
+
             document.apiform.reset();
         }
     </script>
